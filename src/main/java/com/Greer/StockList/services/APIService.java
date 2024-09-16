@@ -1,4 +1,4 @@
-package com.Greer.StockList.Services;
+package com.Greer.StockList.services;
 
 import org.springframework.stereotype.Service;
 
