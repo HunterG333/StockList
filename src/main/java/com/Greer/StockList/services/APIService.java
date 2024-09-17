@@ -12,10 +12,11 @@ import java.net.http.HttpResponse;
 @Service
 public class APIService {
 
-    private static final String API_KEY = System.getenv("FINNHUB_API_KEY");
+    private static final String FINNHUB_API_KEY = System.getenv("FINNHUB_API_KEY");
+    private static final String APLHA_VANTAGE_API_KEY = System.getenv("ALPHA_VANTAGE_API_KEY");
 
     //TODO: Implement websocket
-    private static final String WS_URL = "wss://ws.finnhub.io?token=" + API_KEY;
+    private static final String WS_URL = "wss://ws.finnhub.io?token=" + FINNHUB_API_KEY;
 
     /**
      * Returns the current information about a stock
@@ -25,11 +26,11 @@ public class APIService {
      * @throws IOException
      * @throws InterruptedException
      */
-    public String getStock(String symbol) throws URISyntaxException, IOException, InterruptedException {
+    public String getStockLive(String symbol) throws URISyntaxException, IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
-                .uri(new URI("https://finnhub.io/api/v1/quote?symbol=" + symbol + "&token=" + API_KEY))
+                .uri(new URI("https://finnhub.io/api/v1/quote?symbol=" + symbol + "&token=" + FINNHUB_API_KEY))
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());

@@ -21,6 +21,6 @@ public class ViewController {
 
     @GetMapping("/NVDA")
     public String getNVDA() throws URISyntaxException, IOException, InterruptedException {
-        return apiService.getStock("NVDA");
+        return apiService.getStockLive("NVDA");
     }
 }
