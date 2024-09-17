@@ -1,26 +1,11 @@
 package com.Greer.StockList.controller;
 
-import com.Greer.StockList.services.APIService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 
 @RestController
 @RequestMapping("/api")
 public class ViewController {
 
-    APIService apiService;
-
-    public ViewController(APIService apiService){
-        this.apiService = apiService;
-    }
-
-    @GetMapping("/NVDA")
-    public String getNVDA() throws URISyntaxException, IOException, InterruptedException {
-        return apiService.getStockLive("NVDA");
-    }
 }

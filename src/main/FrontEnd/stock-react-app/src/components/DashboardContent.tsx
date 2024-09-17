@@ -4,7 +4,7 @@ import { LineGraph } from "./graph/Line.tsx";
 //create a list 
 async function getMarketData(stock: string, size: number){
     try {
-        const response = await fetch(`http://localhost:8080/api/marketdata?stock=${stock}&size=${size}`, {
+        const response = await fetch(`http://localhost:8080/api/marketdata?stock=${stock}&days=${size}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -34,9 +34,9 @@ function DashboardContent() {
     // Fetch market data when the component mounts
     useEffect(() => {
         async function fetchData() {
-            const dow = await getMarketData("dow", 5);
-            const sp = await getMarketData("sp", 5);
-            const nas = await getMarketData("nas", 5);
+            const dow = await getMarketData("DIA", 5);
+            const sp = await getMarketData("SPY", 5);
+            const nas = await getMarketData("QQQ", 5);
 
             if (dow) setDowData(dow);
             if (sp) setSpData(sp);

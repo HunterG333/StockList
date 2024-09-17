@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +21,10 @@ public class MarketDataController {
         this.stockService = stockService;
     }
 
+    //TODO: CURRENTLY HARDCODED FOR DAYS, MODIFY TO COMPENSATE FOR LONGER TIME PERIODS
     @GetMapping("/marketdata")
-    public List<Double> getMarketData(@RequestParam String stock, @RequestParam int size) {
-        System.out.println("Returning " + stock);
-        List<Double> historicalData = new ArrayList<>(stockService.getHistorical(stock, size));
+    public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
+        List<Double> historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days-1));
         double lastUpdate = stockService.getLastUpdate(stock);
         historicalData.add(lastUpdate);
         return historicalData;

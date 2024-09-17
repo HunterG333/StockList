@@ -26,6 +26,6 @@ public class StockEntity {
     private double value;
 
     @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StockHistoryEntity> historicalData;
+    private List<StockDailyEntity> historicalData;
 
 }
