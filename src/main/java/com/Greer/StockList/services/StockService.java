@@ -1,7 +1,6 @@
 package com.Greer.StockList.services;
 
 import com.Greer.StockList.controller.APIController;
-import com.Greer.StockList.model.StockDailyEntity;
 import com.Greer.StockList.model.StockEntity;
 import com.Greer.StockList.repository.StockDailyRepository;
 import com.Greer.StockList.repository.StockRepository;
@@ -11,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,38 +58,7 @@ public class StockService {
     //TODO: OPTIMIZE TO QUERY DATABASE FOR LIST OF VALUES IN REQUESTED TIME FRAME
     public List<Double> getDailyHistory(String stock, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
         // Fetch the history data from the API
-        String historyData = apiController.getStockHistory(stock, trailingDays);
-
-        // Create an ObjectMapper to parse the JSON response
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(historyData);
-
-        // Since the dates are now directly in the root node, no need to check for "Time Series (Daily)"
-        if (rootNode.isEmpty()) {
-            System.out.println("Error: No data found in the response.");
-            return Collections.emptyList();  // Return an empty list if data is missing
-        }
-
-        // Use a TreeMap to store the data, which automatically sorts by key (date)
-        Map<String, Double> sortedClosingPrices = new TreeMap<>();
-
-        // Iterate over each date entry in the root node
-        rootNode.fields().forEachRemaining(entry -> {
-            String date = entry.getKey();
-            JsonNode dailyData = entry.getValue();
-
-            // Extract the "4. close" value and put it in the sorted map
-            if (dailyData.has("4. close")) {
-                double closingPrice = dailyData.get("4. close").asDouble();
-                sortedClosingPrices.put(date, closingPrice);
-            }
-        });
-
-        // Convert the sorted closing prices to a list
-        List<Double> closingPrices = sortedClosingPrices.values().stream()
-                .limit(trailingDays)  // Limit to the number of trailingDays
-                .collect(Collectors.toList());
-
+        List<Double> closingPrices = apiController.getStockHistory(stock, trailingDays);
         return closingPrices;
     }
 

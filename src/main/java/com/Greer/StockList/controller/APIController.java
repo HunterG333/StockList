@@ -1,5 +1,6 @@
 package com.Greer.StockList.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -10,9 +11,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -20,9 +19,6 @@ public class APIController {
 
     private static final String FINNHUB_API_KEY = System.getenv("FINNHUB_API_KEY");
     private static final String APLHA_VANTAGE_API_KEY = System.getenv("ALPHA_VANTAGE_API_KEY");
-
-    //TODO: Implement websocket
-    private static final String WS_URL = "wss://ws.finnhub.io?token=" + FINNHUB_API_KEY;
 
     /**
      * Returns the current information about a stock
@@ -45,7 +41,7 @@ public class APIController {
     }
 
     //TODO: SAVE DATA TO DATABASE TO REDUCE API CALLS
-    public String getStockHistory(String symbol, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
+    public List<Double> getStockHistory(String symbol, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
@@ -54,34 +50,41 @@ public class APIController {
                 .build();
         HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
 
-        // Load the mock file from src/main/resources
-        //ClassPathResource mockFile = new ClassPathResource("mockData.txt");
+        return parseAlphaVantageResponse(response, trailingDays);
+    }
 
-        // Read the content of the file as a String
-        //InputStream inputStream = mockFile.getInputStream();
-        //String fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
+    public List<Double> parseAlphaVantageResponse(HttpResponse<String> response, int trailingDays) throws JsonProcessingException {
         // Parse the response
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(response.body());
-        //JsonNode rootNode = mapper.readTree(fileContent);
 
         // Extract the time series data
         JsonNode timeSeriesNode = rootNode.path("Time Series (Daily)");
 
-        // Convert JsonNode to Map
-        Map<String, JsonNode> timeSeriesMap = mapper.convertValue(timeSeriesNode, Map.class);
+        // Use a TreeMap to store the data, which automatically sorts by key (date)
+        Map<String, Double> sortedClosingPrices = new TreeMap<>(Collections.reverseOrder());
 
-        // Limit the number of entries
-        List<Map.Entry<String, JsonNode>> limitedEntries = timeSeriesMap.entrySet().stream()
-                .limit(trailingDays)
+        // Iterate over each date entry in the timeSeries node
+        timeSeriesNode.fields().forEachRemaining(entry -> {
+            String date = entry.getKey();
+            JsonNode dailyData = entry.getValue();
+
+            // Extract the "4. close" value and put it in the sorted map
+            if (dailyData.has("4. close")) {
+                double closingPrice = dailyData.get("4. close").asDouble();
+                sortedClosingPrices.put(date, closingPrice);
+            }
+        });
+
+        // Convert the sorted closing prices to a list
+
+        List<Double> closingPrices = sortedClosingPrices.values().stream()
+                .limit(trailingDays)  // Limit to the number of trailingDays
                 .collect(Collectors.toList());
 
-        // Convert the limited entries back to JSON
-        ObjectMapper resultMapper = new ObjectMapper();
-        JsonNode resultNode = resultMapper.valueToTree(new LinkedHashMap<>(limitedEntries.stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
+        Collections.reverse(closingPrices);
 
-        return resultMapper.writeValueAsString(resultNode);
+        return closingPrices;
     }
 }

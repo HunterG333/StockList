@@ -24,6 +24,10 @@ public class MarketDataController {
     //TODO: CURRENTLY HARDCODED FOR DAYS, MODIFY TO COMPENSATE FOR LONGER TIME PERIODS
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
+
+        //TODO: IMPLEMENT LOGIC WHERE ON A WEEKEND & HOLIDAY THE 5 CLOSING DAYS ARE RETURNED BUT ON A WEEKDAY 4 CLOSING DAYS
+        //TODO: AND THE CURRENT LIVE DAY
+
         List<Double> historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days-1));
         double lastUpdate = stockService.getLastUpdate(stock);
         historicalData.add(lastUpdate);
