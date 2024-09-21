@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +28,15 @@ public class MarketDataController {
 
         //TODO: IMPLEMENT LOGIC WHERE ON A WEEKEND & HOLIDAY THE 5 CLOSING DAYS ARE RETURNED BUT ON A WEEKDAY 4 CLOSING DAYS
         //TODO: AND THE CURRENT LIVE DAY
-
-        List<Double> historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days-1));
-        double lastUpdate = stockService.getLastUpdate(stock);
-        historicalData.add(lastUpdate);
+        boolean isMarketOpen = stockService.isMarketOpen();
+        List<Double> historicalData;
+        if(isMarketOpen){
+            historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days-1));
+            double lastUpdate = stockService.getLastUpdate(stock);
+            historicalData.add(lastUpdate);
+        }else{
+            historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days));
+        }
         return historicalData;
     }
 }

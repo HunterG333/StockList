@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -60,6 +61,10 @@ public class StockService {
         // Fetch the history data from the API
         List<Double> closingPrices = apiController.getStockHistory(stock, trailingDays);
         return closingPrices;
+    }
+
+    public Boolean isMarketOpen() throws URISyntaxException, IOException, InterruptedException {
+        return apiController.isMarketOpen();
     }
 
 
