@@ -46,11 +46,22 @@ function DashboardContent() {
         fetchData();
     }, []);  // Empty dependency array means this runs once when the component mounts
 
+    // Function to determine the color based on data
+    const getLineColor = (data: number[]) => {
+        if (data.length >= 2) {
+            const first = data[0];
+            const last = data[data.length - 1];
+            return last > first ? 'rgb(0, 200, 0)' : 'rgb(200, 0, 0)'; // Green if last > first, Red otherwise
+        }
+        return 'rgb(128, 128, 128)'; // Default color in case of insufficient data
+    };
+
+    
     return (
         <div style={{ display: "flex", justifyContent: "space-around", gap: "5%" }}>
-            <LineGraph stockLabel="Dow Jones" stockData={dowData} lineColor="rgb(75, 192, 192)" />
-            <LineGraph stockLabel="S&P 500" stockData={spData} lineColor="rgb(255, 99, 132)" />
-            <LineGraph stockLabel="Nasdaq" stockData={nasData} lineColor="rgb(54, 162, 235)" />
+            <LineGraph stockLabel="Dow Jones" stockData={dowData} lineColor={getLineColor(dowData)} />
+            <LineGraph stockLabel="S&P 500" stockData={spData} lineColor={getLineColor(spData)} />
+            <LineGraph stockLabel="Nasdaq" stockData={nasData} lineColor={getLineColor(nasData)} />
         </div>
     );
 }
