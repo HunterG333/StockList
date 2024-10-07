@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LineGraph } from "./graph/Line.tsx";
+import SearchBar from "./searchBar.tsx";
 
 //create a list 
 async function getMarketData(stock: string, size: number){
@@ -44,7 +45,7 @@ function DashboardContent() {
         }
 
         fetchData();
-    }, []);  // Empty dependency array means this runs once when the component mounts
+    }, []);  // Change array to depend on dow sp and nas if we migrate to a live socket
 
     // Function to determine the color based on data
     const getLineColor = (data: number[]) => {
