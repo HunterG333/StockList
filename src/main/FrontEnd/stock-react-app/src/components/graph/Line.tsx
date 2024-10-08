@@ -49,9 +49,9 @@ export const LineGraph = ({ stockLabel, stockData, lineColor }) => {
             generateTradingDates(5),
         datasets: [
             {
-                label: stockLabel, // Use the label from props
-                data: stockData,   // Use the stock data from props
-                borderColor: lineColor, // Use the line color from props
+                label: stockLabel,
+                data: stockData,  
+                borderColor: lineColor, 
             },
         ],
     };
@@ -59,7 +59,31 @@ export const LineGraph = ({ stockLabel, stockData, lineColor }) => {
     const options = {
         maintainAspectRatio: false,
         responsive: true,
+        layout: {
+            padding: {
+                top: 20,
+                bottom: 40,
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    autoSkip: true,    
+                    maxRotation: 0,    
+                    minRotation: 0,    
+                    padding: 10,        
+                },
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top' as const,
+            },
+        },
     };
+    
+    
 
     return (
         <div style={{ width: "100%", height: "450px", maxWidth: "33vw" }}>
