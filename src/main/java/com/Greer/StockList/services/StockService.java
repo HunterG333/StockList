@@ -16,12 +16,10 @@ import java.util.List;
 public class StockService {
 
     private StockRepository stockRepository;
-    private StockDailyRepository stockDailyRepository;
     private APIController apiController;
 
-    public StockService(StockRepository stockRepository, StockDailyRepository stockDailyRepository, APIController apiController){
+    public StockService(StockRepository stockRepository, APIController apiController){
         this.stockRepository = stockRepository;
-        this.stockDailyRepository = stockDailyRepository;
         this.apiController = apiController;
     }
 
