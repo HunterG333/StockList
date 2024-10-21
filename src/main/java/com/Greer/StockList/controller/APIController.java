@@ -55,18 +55,6 @@ public class APIController {
         return parseAlphaVantageResponse(response, trailingDays);
     }
 
-    public boolean isMarketOpen() throws URISyntaxException, IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest getRequest = HttpRequest.newBuilder()
-                .uri(new URI("https://finnhub.io/api/v1/stock/market-status?exchange=US&token=" + FINNHUB_API_KEY))
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
-
-        return parseAndReturnMarketStatus(response);
-    }
-
     private boolean parseAndReturnMarketStatus(HttpResponse<String> response) throws JsonProcessingException {
         // Parse the response
         ObjectMapper mapper = new ObjectMapper();

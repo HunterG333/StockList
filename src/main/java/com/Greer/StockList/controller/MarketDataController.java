@@ -33,9 +33,6 @@ public class MarketDataController {
      */
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
-
-        //TODO: Find a way to find if the market is open without calling an API. Maybe store holidays and check
-        //TODO: if it is a weekend of holiday
         boolean isMarketOpen = stockService.isMarketOpen();
 
         List<Double> historicalData;

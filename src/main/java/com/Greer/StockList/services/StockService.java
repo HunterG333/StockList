@@ -18,11 +18,13 @@ public class StockService {
     private StockRepository stockRepository;
     private StockDailyRepository stockDailyRepository;
     private APIController apiController;
+    private HolidaysService holidaysService;
 
-    public StockService(StockRepository stockRepository, StockDailyRepository stockDailyRepository, APIController apiController){
+    public StockService(StockRepository stockRepository, StockDailyRepository stockDailyRepository, APIController apiController, HolidaysService holidaysService){
         this.stockRepository = stockRepository;
         this.stockDailyRepository = stockDailyRepository;
         this.apiController = apiController;
+        this.holidaysService = holidaysService;
     }
 
     public StockEntity save(StockEntity stockEntity){
@@ -59,9 +61,8 @@ public class StockService {
         return closingPrices;
     }
 
-    //TODO: CHECK IF IT IS A HOLIDAY OR A WEEKEND
-    public Boolean isMarketOpen() throws URISyntaxException, IOException, InterruptedException {
-        return apiController.isMarketOpen();
+    public Boolean isMarketOpen() {
+        return holidaysService.isMarketOpen();
     }
 
 }

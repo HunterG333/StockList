@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -43,5 +45,26 @@ public class HolidaysService {
                 holidayRepository.save(holiday);
             }
         }
+    }
+
+    //TODO: Logic for determining if the market is open or not
+    public boolean isMarketOpen(){
+
+        LocalDate today = LocalDate.now();
+
+        // Check if today is a weekend (Saturday or Sunday)
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return false;  // Market is closed on weekends
+        }
+
+        // Check if today is a holiday by querying the database
+        List<HolidaysEntity> holidays = holidayRepository.findAllByHolidayDate(today);
+        if (!holidays.isEmpty()) {
+            return false;  // Market is closed on holidays
+        }
+
+        // Market is open if it's not a weekend or a holiday
+        return true;
     }
 }

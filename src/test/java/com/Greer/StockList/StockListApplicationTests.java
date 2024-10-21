@@ -46,4 +46,5 @@ class StockListApplicationTests {
 		System.out.println(result);
 	}
 
+
 }
