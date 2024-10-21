@@ -1,5 +1,6 @@
 package com.Greer.StockList.controller;
 
+import com.Greer.StockList.services.HolidaysService;
 import com.Greer.StockList.services.StockService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +13,11 @@ import java.util.List;
 @RequestMapping("/api")
 public class MarketDataController {
 
+    HolidaysService holidaysService;
     StockService stockService;
 
-    public MarketDataController(StockService stockService){
+    public MarketDataController(HolidaysService holidaysService, StockService stockService){
+        this.holidaysService = holidaysService;
         this.stockService = stockService;
     }
 
@@ -53,7 +56,7 @@ public class MarketDataController {
      */
     @GetMapping("/holidays")
     public String updateHolidays() throws IOException, URISyntaxException, InterruptedException {
-        System.out.println(stockService.getHolidays());
+        holidaysService.updateHolidays();
         return "Congrats you found a secret page!";
     }
 }

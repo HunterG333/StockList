@@ -20,6 +20,10 @@ public class HolidaysEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    private String holiday;
+
     private LocalDate holidayDate;
+
+    private String tradingHour;
 
 }

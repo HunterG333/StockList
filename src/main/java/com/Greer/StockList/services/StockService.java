@@ -64,8 +64,4 @@ public class StockService {
         return apiController.isMarketOpen();
     }
 
-    public String getHolidays() throws IOException, URISyntaxException, InterruptedException {
-        return apiController.getHolidays();
-    }
-
 }

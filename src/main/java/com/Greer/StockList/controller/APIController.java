@@ -1,5 +1,6 @@
 package com.Greer.StockList.controller;
 
+import com.Greer.StockList.model.HolidaysEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,10 +12,8 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -111,7 +110,7 @@ public class APIController {
         return closingPrices;
     }
 
-    public String getHolidays() throws IOException, InterruptedException, URISyntaxException {
+    public List<HolidaysEntity> getHolidays() throws IOException, InterruptedException, URISyntaxException {
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
@@ -120,6 +119,46 @@ public class APIController {
                 .build();
         HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
 
-        return response.body();
+        return parseHolidays(response.body());
+    }
+
+    /**
+     * Parses the api response from hinnhub into a list of holidays entity object
+     * @param apiResponse The api response from finnhub regarding holidays in the US exchange
+     * @return a list of holiday entities
+     */
+    public List<HolidaysEntity> parseHolidays(String apiResponse){
+        List<HolidaysEntity> holidaysList = new ArrayList<>();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode dataNode = rootNode.get("data");
+
+            if (dataNode != null && dataNode.isArray()) {
+                for (JsonNode eventNode : dataNode) {
+                    String holiday = eventNode.get("eventName").asText();
+                    String atDate = eventNode.get("atDate").asText();
+                    String tradingHour = eventNode.get("tradingHour").asText();
+
+                    // Convert atDate string to LocalDate
+                    LocalDate holidayDate = LocalDate.parse(atDate);
+
+                    // Create HolidaysEntity object using the builder pattern
+                    HolidaysEntity holidayEntity = HolidaysEntity.builder()
+                            .holiday(holiday)
+                            .holidayDate(holidayDate)
+                            .tradingHour(tradingHour)
+                            .build();
+
+                    // Add to the list
+                    holidaysList.add(holidayEntity);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return holidaysList;
     }
 }
