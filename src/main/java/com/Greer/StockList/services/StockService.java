@@ -16,10 +16,12 @@ import java.util.List;
 public class StockService {
 
     private StockRepository stockRepository;
+    private StockDailyRepository stockDailyRepository;
     private APIController apiController;
 
-    public StockService(StockRepository stockRepository, APIController apiController){
+    public StockService(StockRepository stockRepository, StockDailyRepository stockDailyRepository, APIController apiController){
         this.stockRepository = stockRepository;
+        this.stockDailyRepository = stockDailyRepository;
         this.apiController = apiController;
     }
 
@@ -51,14 +53,19 @@ public class StockService {
 
     //TODO: OPTIMIZE TO QUERY DATABASE FOR LIST OF VALUES IN REQUESTED TIME FRAME
     public List<Double> getDailyHistory(String stock, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
+
         // Fetch the history data from the API
         List<Double> closingPrices = apiController.getStockHistory(stock, trailingDays);
         return closingPrices;
     }
 
+    //TODO: CHECK IF IT IS A HOLIDAY OR A WEEKEND
     public Boolean isMarketOpen() throws URISyntaxException, IOException, InterruptedException {
         return apiController.isMarketOpen();
     }
 
+    public String getHolidays() throws IOException, URISyntaxException, InterruptedException {
+        return apiController.getHolidays();
+    }
 
 }

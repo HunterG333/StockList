@@ -110,4 +110,16 @@ public class APIController {
 
         return closingPrices;
     }
+
+    public String getHolidays() throws IOException, InterruptedException, URISyntaxException {
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(new URI("https://finnhub.io/api/v1/stock/market-holiday?exchange=US" + "&token=" + FINNHUB_API_KEY))
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+
+        return response.body();
+    }
 }

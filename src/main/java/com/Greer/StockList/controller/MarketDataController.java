@@ -1,10 +1,7 @@
 package com.Greer.StockList.controller;
 
 import com.Greer.StockList.services.StockService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,11 +18,25 @@ public class MarketDataController {
         this.stockService = stockService;
     }
 
+    /**
+     * TODO: OPTIMIZE AS STATED IN THE COMMENTS IN THIS METHOD
+     * Function that retrieves the market data for a particular stock
+     * @param stock The stock that you want data for
+     * @param days The number of days to get data for
+     * @return A list of Doubles representing the price over X amount of days
+     * @throws URISyntaxException
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
 
+        //TODO: Find a way to find if the market is open without calling an API. Maybe store holidays and check
+        //TODO: if it is a weekend of holiday
         boolean isMarketOpen = stockService.isMarketOpen();
+
         List<Double> historicalData;
+
         if(isMarketOpen){
             historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days-1));
             double lastUpdate = stockService.getLastUpdate(stock);
@@ -34,5 +45,15 @@ public class MarketDataController {
             historicalData = new ArrayList<>(stockService.getDailyHistory(stock, days));
         }
         return historicalData;
+    }
+
+    /**
+     * Function to update the holidays in the database
+     * As of now there is nothing stored
+     */
+    @GetMapping("/holidays")
+    public String updateHolidays() throws IOException, URISyntaxException, InterruptedException {
+        System.out.println(stockService.getHolidays());
+        return "Congrats you found a secret page!";
     }
 }
