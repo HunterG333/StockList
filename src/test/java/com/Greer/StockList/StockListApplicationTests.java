@@ -1,6 +1,9 @@
 package com.Greer.StockList;
 
 import com.Greer.StockList.controller.APIController;
+import com.Greer.StockList.model.HolidaysEntity;
+import com.Greer.StockList.repository.HolidayRepository;
+import com.Greer.StockList.services.HolidaysService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -10,14 +13,17 @@ import java.net.URL;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
 
 @SpringBootTest
 class StockListApplicationTests {
-
 
 	@Test
 	void testThatJSONParsingParsesCorrectly() throws IOException, URISyntaxException {
@@ -45,6 +51,5 @@ class StockListApplicationTests {
 		List<Double> result = apiController.parseAlphaVantageResponse(mockResponse,4);
 		System.out.println(result);
 	}
-
 
 }

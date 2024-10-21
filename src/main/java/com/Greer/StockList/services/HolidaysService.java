@@ -48,18 +48,17 @@ public class HolidaysService {
     }
 
     //TODO: Logic for determining if the market is open or not
-    public boolean isMarketOpen(){
-
-        LocalDate today = LocalDate.now();
+    public boolean isMarketOpen(LocalDate dateToCheck){
 
         // Check if today is a weekend (Saturday or Sunday)
-        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
             return false;  // Market is closed on weekends
         }
 
-        // Check if today is a holiday by querying the database
-        List<HolidaysEntity> holidays = holidayRepository.findAllByHolidayDate(today);
+        //TODO: EDGE CASE if the market is partially open. Enable partially open markets to be shown
+        //Check if today is a holiday by querying the database
+        List<HolidaysEntity> holidays = holidayRepository.findAllByHolidayDate(dateToCheck);
         if (!holidays.isEmpty()) {
             return false;  // Market is closed on holidays
         }

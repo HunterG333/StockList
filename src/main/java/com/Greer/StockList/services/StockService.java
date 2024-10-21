@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -62,7 +63,7 @@ public class StockService {
     }
 
     public Boolean isMarketOpen() {
-        return holidaysService.isMarketOpen();
+        return holidaysService.isMarketOpen(LocalDate.now());
     }
 
 }

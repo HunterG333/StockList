@@ -55,14 +55,6 @@ public class APIController {
         return parseAlphaVantageResponse(response, trailingDays);
     }
 
-    private boolean parseAndReturnMarketStatus(HttpResponse<String> response) throws JsonProcessingException {
-        // Parse the response
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(response.body());
-
-        return rootNode.path("isOpen").asBoolean();
-    }
-
 
     public List<Double> parseAlphaVantageResponse(HttpResponse<String> response, int trailingDays) throws JsonProcessingException {
         // Parse the response
