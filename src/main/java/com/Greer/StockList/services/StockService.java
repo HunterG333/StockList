@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StockService {
@@ -32,11 +35,25 @@ public class StockService {
         return stockRepository.save(stockEntity);
     }
 
-    //TODO: OPTIMIZE SO QUERY DATABASE INSTEAD OF API
     public double getLastUpdate(String stock) throws URISyntaxException, IOException, InterruptedException {
-        // Fetch the stock data from the API
+
+        Optional<StockEntity> stockEntityOptional = stockRepository.findBySymbol(stock);
+        boolean stockEntityExists = stockEntityOptional.isPresent();
+        if(stockEntityExists){
+            StockEntity stockEntity = stockEntityOptional.get();
+
+            LocalDateTime lastUpdated = stockEntity.getLastUpdated();
+            LocalDateTime now = LocalDateTime.now();
+
+            Duration duration = Duration.between(lastUpdated, now);
+
+            if(duration.toMinutes() <= 10){
+                return stockEntity.getValue();
+            }
+        }
+
+        //Fetch the stock data from the API
         String stockData = apiController.getStockLive(stock);
-        System.out.println(stockData);
 
         // Create an ObjectMapper to parse the JSON response
         ObjectMapper mapper = new ObjectMapper();
@@ -46,7 +63,26 @@ public class StockService {
 
         // Extract the 'c' property (current price)
         if (rootNode.has("c")) {
-            return rootNode.get("c").asDouble();  // Return the value of 'c'
+            double stockValue = rootNode.get("c").asDouble();
+
+            if(stockEntityExists){
+                StockEntity stockEntity = stockEntityOptional.get();
+                stockEntity.setValue(stockValue);
+                stockEntity.setLastUpdated(LocalDateTime.now());
+
+                stockRepository.save(stockEntity);
+            }else{
+                StockEntity newStockEntity = new StockEntity();
+                newStockEntity.setSymbol(stock);
+                newStockEntity.setValue(stockValue);
+                newStockEntity.setLastUpdated(LocalDateTime.now());
+
+                // Save the new entity to the database
+                stockRepository.save(newStockEntity);
+            }
+
+
+            return stockValue; // Return the value of 'c'
         }
 
         // If 'c' is not present, return a default value or throw an exception
