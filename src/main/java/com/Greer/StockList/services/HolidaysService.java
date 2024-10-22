@@ -11,15 +11,14 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class HolidaysService {
 
-    private APIController apiController;
-    private HolidayRepository holidayRepository;
+    private final APIController apiController;
+    private final HolidayRepository holidayRepository;
 
     public HolidaysService(APIController apiController, HolidayRepository holidayRepository){
         this.apiController = apiController;

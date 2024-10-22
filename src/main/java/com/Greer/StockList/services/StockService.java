@@ -18,10 +18,10 @@ import java.util.Optional;
 @Service
 public class StockService {
 
-    private StockRepository stockRepository;
-    private StockDailyRepository stockDailyRepository;
-    private APIController apiController;
-    private HolidaysService holidaysService;
+    private final StockRepository stockRepository;
+    private final StockDailyRepository stockDailyRepository;
+    private final APIController apiController;
+    private final HolidaysService holidaysService;
 
     public StockService(StockRepository stockRepository, StockDailyRepository stockDailyRepository, APIController apiController, HolidaysService holidaysService){
         this.stockRepository = stockRepository;
