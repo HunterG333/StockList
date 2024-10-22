@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class MarketDataController {
      */
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
-        boolean isMarketOpen = stockService.isMarketOpen();
+        boolean isMarketOpen = holidaysService.isMarketOpen(LocalDate.now());
 
         List<Double> historicalData;
 

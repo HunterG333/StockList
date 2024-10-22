@@ -98,8 +98,4 @@ public class StockService {
         return closingPrices;
     }
 
-    public Boolean isMarketOpen() {
-        return holidaysService.isMarketOpen(LocalDate.now());
-    }
-
 }

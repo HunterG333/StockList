@@ -31,6 +31,8 @@ public class APIController {
      * @throws InterruptedException
      */
     public String getStockLive(String symbol) throws URISyntaxException, IOException, InterruptedException {
+        System.out.println("API CALL: Called getStockLive()");
+
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
@@ -42,8 +44,9 @@ public class APIController {
         return response.body();
     }
 
-    //TODO: SAVE DATA TO DATABASE TO REDUCE API CALLS
     public List<Double> getStockHistory(String symbol, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
+        System.out.println("API CALL: Called getStockHistory()");
+
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
@@ -91,6 +94,8 @@ public class APIController {
     }
 
     public List<HolidaysEntity> getHolidays() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("API CALL: Called getStockHistory()");
+
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest getRequest = HttpRequest.newBuilder()
