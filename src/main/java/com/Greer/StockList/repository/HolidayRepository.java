@@ -14,5 +14,5 @@ public interface HolidayRepository extends CrudRepository<HolidaysEntity, Long> 
 
     Optional<HolidaysEntity> findByHolidayDate(LocalDate holidayDate);
 
-    List<HolidaysEntity> findAllByHolidayDate(LocalDate today);
+    Optional<HolidaysEntity> findAllByHolidayDate(LocalDate today);
 }

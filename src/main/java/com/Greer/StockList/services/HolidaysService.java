@@ -9,7 +9,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HolidaysService {
@@ -47,8 +51,7 @@ public class HolidaysService {
         }
     }
 
-    //TODO: Logic for determining if the market is open or not
-    public boolean isMarketOpen(LocalDate dateToCheck){
+    public boolean isMarketOpen(LocalDateTime dateToCheck){
 
         // Check if today is a weekend (Saturday or Sunday)
         DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
@@ -56,11 +59,30 @@ public class HolidaysService {
             return false;  // Market is closed on weekends
         }
 
-        //TODO: EDGE CASE if the market is partially open. Enable partially open markets to be shown
         //Check if today is a holiday by querying the database
-        List<HolidaysEntity> holidays = holidayRepository.findAllByHolidayDate(dateToCheck);
-        if (!holidays.isEmpty()) {
-            return false;  // Market is closed on holidays
+        Optional<HolidaysEntity> holiday = holidayRepository.findAllByHolidayDate(LocalDate.from(dateToCheck));
+        if (holiday.isPresent()) {
+            //check if time now is in trading hours
+            String tradingHours = holiday.get().getTradingHour();
+            if(tradingHours.isEmpty()){
+                return false; //market is closed because it is a holiday and there are no trading hours
+            }
+
+            //need to parse trading hours to a beginning time and end time
+            String[] hours = tradingHours.split("-");
+            if (hours.length != 2) {
+                throw new IllegalArgumentException("Invalid trading hours format: " + tradingHours);
+            }
+
+            // Parse the start and end times
+            LocalTime startTime = LocalTime.parse(hours[0]);
+            LocalTime endTime = LocalTime.parse(hours[1]);
+
+            // Extract the time from dateToCheck
+            LocalTime currentTime = dateToCheck.toLocalTime();
+
+            // Check if the current time is within the trading hours
+            return !currentTime.isBefore(startTime) && !currentTime.isAfter(endTime); // Market is open (inclusive of start and end times)
         }
 
         // Market is open if it's not a weekend or a holiday

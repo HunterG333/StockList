@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -92,6 +91,8 @@ public class StockService {
 
     //TODO: OPTIMIZE TO QUERY DATABASE FOR LIST OF VALUES IN REQUESTED TIME FRAME
     public List<Double> getDailyHistory(String stock, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
+
+        holidaysService.isMarketOpen(LocalDateTime.now());
 
         // Fetch the history data from the API
         List<Double> closingPrices = apiController.getStockHistory(stock, trailingDays);

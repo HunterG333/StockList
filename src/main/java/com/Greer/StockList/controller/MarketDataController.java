@@ -2,11 +2,14 @@ package com.Greer.StockList.controller;
 
 import com.Greer.StockList.services.HolidaysService;
 import com.Greer.StockList.services.StockService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +26,6 @@ public class MarketDataController {
     }
 
     /**
-     * TODO: OPTIMIZE AS STATED IN THE COMMENTS IN THIS METHOD
      * Function that retrieves the market data for a particular stock
      * @param stock The stock that you want data for
      * @param days The number of days to get data for
@@ -34,7 +36,7 @@ public class MarketDataController {
      */
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
-        boolean isMarketOpen = holidaysService.isMarketOpen(LocalDate.now());
+        boolean isMarketOpen = holidaysService.isMarketOpen(LocalDateTime.now());
 
         List<Double> historicalData;
 
