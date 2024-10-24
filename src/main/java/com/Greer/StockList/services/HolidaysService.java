@@ -50,12 +50,34 @@ public class HolidaysService {
         }
     }
 
-    public boolean isMarketOpen(LocalDateTime dateToCheck){
+    /**
+     * Checks if the market is open on a specific date
+     * @param dateToCheck The date of the day to check
+     * @return A boolean if the market is open on that day
+     */
+    public boolean isMarketOpenDate(LocalDate dateToCheck){
+        DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
+        if(isWeekend(dateToCheck)){
+            return false;
+        }
+
+        Optional<HolidaysEntity> holiday = holidayRepository.findAllByHolidayDate(LocalDate.from(dateToCheck));
+        if(holiday.isPresent() && holiday.get().getTradingHour().isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the market is open at the specific date & time given.
+     * @param dateToCheck The time and date of the day to check
+     * @return A boolean if the market is open at the time specified
+     */
+    public boolean isMarketOpenTime(LocalDateTime dateToCheck){
 
         // Check if today is a weekend (Saturday or Sunday)
-        DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
-        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-            return false;  // Market is closed on weekends
+        if(isWeekend(dateToCheck)){
+            return false;
         }
 
         //Check if today is a holiday by querying the database
@@ -86,5 +108,15 @@ public class HolidaysService {
 
         // Market is open if it's not a weekend or a holiday
         return true;
+    }
+
+    public boolean isWeekend(LocalDate dateToCheck){
+        DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;  // Market is closed on weekends
+    }
+
+    public boolean isWeekend(LocalDateTime dateToCheck){
+        DayOfWeek dayOfWeek = dateToCheck.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;  // Market is closed on weekends
     }
 }

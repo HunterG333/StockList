@@ -20,9 +20,7 @@ public class StockDailyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "stock_id", nullable = false)
-    private StockEntity stock;
+    private String stock;
 
     private LocalDate date;
 

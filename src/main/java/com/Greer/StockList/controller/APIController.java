@@ -1,6 +1,7 @@
 package com.Greer.StockList.controller;
 
 import com.Greer.StockList.model.HolidaysEntity;
+import com.Greer.StockList.model.StockDailyEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +45,7 @@ public class APIController {
         return response.body();
     }
 
-    public List<Double> getStockHistory(String symbol, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
+    public List<StockDailyEntity> getStockHistory(String symbol, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
         System.out.println("API CALL: Called getStockHistory()");
 
         HttpClient client = HttpClient.newHttpClient();
@@ -55,11 +56,12 @@ public class APIController {
                 .build();
         HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
 
-        return parseAlphaVantageResponse(response, trailingDays);
+
+        return parseAlphaVantageResponse(response, trailingDays, symbol);
     }
 
 
-    public List<Double> parseAlphaVantageResponse(HttpResponse<String> response, int trailingDays) throws JsonProcessingException {
+    public List<StockDailyEntity> parseAlphaVantageResponse(HttpResponse<String> response, int trailingDays, String symbol) throws JsonProcessingException {
         // Parse the response
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(response.body());
@@ -68,30 +70,43 @@ public class APIController {
         JsonNode timeSeriesNode = rootNode.path("Time Series (Daily)");
 
         // Use a TreeMap to store the data, which automatically sorts by key (date)
-        Map<String, Double> sortedClosingPrices = new TreeMap<>(Collections.reverseOrder());
+        Map<String, JsonNode> sortedDailyData = new TreeMap<>(Collections.reverseOrder());
 
         // Iterate over each date entry in the timeSeries node
         timeSeriesNode.fields().forEachRemaining(entry -> {
             String date = entry.getKey();
             JsonNode dailyData = entry.getValue();
 
-            // Extract the "4. close" value and put it in the sorted map
+            // Add to the map only if "4. close" is present
             if (dailyData.has("4. close")) {
-                double closingPrice = dailyData.get("4. close").asDouble();
-                sortedClosingPrices.put(date, closingPrice);
+                sortedDailyData.put(date, dailyData);
             }
         });
 
-        // Convert the sorted closing prices to a list
+        // Create a list of StockDailyEntity
+        List<StockDailyEntity> stockDailyEntities = sortedDailyData.entrySet().stream()
+                .limit(trailingDays) // Limit to the number of trailingDays
+                .map(entry -> {
+                    String date = entry.getKey();
+                    JsonNode dailyData = entry.getValue();
+                    double closingPrice = dailyData.get("4. close").asDouble();
 
-        List<Double> closingPrices = sortedClosingPrices.values().stream()
-                .limit(trailingDays)  // Limit to the number of trailingDays
+                    // Create a new StockDailyEntity for each entry
+                    StockDailyEntity entity = new StockDailyEntity();
+                    entity.setDate(LocalDate.parse(date));
+                    entity.setValue(closingPrice);
+                    entity.setStock(symbol);
+
+                    return entity;
+                })
                 .collect(Collectors.toList());
 
-        Collections.reverse(closingPrices);
+        // Reverse the list so that the oldest entries come first
+        Collections.reverse(stockDailyEntities);
 
-        return closingPrices;
+        return stockDailyEntities;
     }
+
 
     public List<HolidaysEntity> getHolidays() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("API CALL: Called getStockHistory()");

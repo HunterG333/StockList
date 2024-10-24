@@ -36,7 +36,7 @@ public class MarketDataController {
      */
     @GetMapping("/marketdata")
     public List<Double> getMarketData(@RequestParam String stock, @RequestParam int days) throws URISyntaxException, IOException, InterruptedException {
-        boolean isMarketOpen = holidaysService.isMarketOpen(LocalDateTime.now());
+        boolean isMarketOpen = holidaysService.isMarketOpenTime(LocalDateTime.now());
 
         List<Double> historicalData;
 

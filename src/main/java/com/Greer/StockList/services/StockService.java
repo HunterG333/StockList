@@ -1,6 +1,7 @@
 package com.Greer.StockList.services;
 
 import com.Greer.StockList.controller.APIController;
+import com.Greer.StockList.model.StockDailyEntity;
 import com.Greer.StockList.model.StockEntity;
 import com.Greer.StockList.repository.StockDailyRepository;
 import com.Greer.StockList.repository.StockRepository;
@@ -11,9 +12,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StockService {
@@ -89,14 +94,98 @@ public class StockService {
         return -10.0;
     }
 
-    //TODO: OPTIMIZE TO QUERY DATABASE FOR LIST OF VALUES IN REQUESTED TIME FRAME
+    //TODO: Probably easier to check when the last time history was updated for a current stock instead of cross checking dates
     public List<Double> getDailyHistory(String stock, int trailingDays) throws URISyntaxException, IOException, InterruptedException {
 
-        holidaysService.isMarketOpen(LocalDateTime.now());
+        //TODO: CHANGE FROM TOP5 TO TOPX WHEN WE ADD SUPPORT FOR LONGER CHARTS
+        List<StockDailyEntity> returnedHistory = stockDailyRepository.findTop5BySymbol(stock);
 
-        // Fetch the history data from the API
-        List<Double> closingPrices = apiController.getStockHistory(stock, trailingDays);
-        return closingPrices;
+        if(returnedHistory.isEmpty()){ //save history to database from API call and return data
+
+            // Fetch the history data from the API
+            List<StockDailyEntity> stockHistoryEntities = apiController.getStockHistory(stock, trailingDays);
+
+            stockHistoryEntities.forEach(stockDailyRepository::save);
+
+            List<Double> closingPrices = stockHistoryEntities.stream()
+                    .map(StockDailyEntity::getValue)
+                    .collect(Collectors.toList());
+
+            return closingPrices;
+        }
+        //returnedHistory is not empty. Check if it is updated
+
+        List<LocalDate> tradingDays = getLastValidTradingDays(trailingDays);
+
+
+        List<LocalDate> existingTradingDays = new ArrayList<>(); //days that exist in the history
+        List<LocalDate> nonExistingTradingDays = new ArrayList<>(); //days that need to be added to the history
+
+        // Check if each trading day exists in returnedHistory
+        for (LocalDate tradingDay : tradingDays) {
+            boolean exists = false; // Flag to check existence
+
+            for (StockDailyEntity entity : returnedHistory) {
+                if (entity.getDate().isEqual(tradingDay)) {
+                    existingTradingDays.add(tradingDay);
+                    exists = true; // Mark as found
+                    break; // Stop checking further once found
+                }
+            }
+
+            // If it doesn't exist in the history, add to the non-existing list
+            if (!exists) {
+                nonExistingTradingDays.add(tradingDay);
+            }
+        }
+
+        if(nonExistingTradingDays.isEmpty()){
+            //data is valid, return it
+
+            return returnedHistory.stream()
+                    .map(StockDailyEntity::getValue)
+                    .collect(Collectors.toList())
+                    .reversed();
+        }
+
+        //call the api and save the amount of non existing trading days to the history
+        List<StockDailyEntity> stockHistoryEntities = apiController.getStockHistory(stock, nonExistingTradingDays.size());
+        stockHistoryEntities.forEach(stockDailyRepository::save);
+
+        stockHistoryEntities.addAll(returnedHistory);
+
+        return stockHistoryEntities.stream()
+                .map(StockDailyEntity::getValue)
+                .collect(Collectors.toList())
+                .reversed();
+    }
+
+    public List<LocalDate> getLastValidTradingDays(int numDays) {
+        List<LocalDate> validTradingDays = new ArrayList<>();
+        LocalDate dateToCheck = LocalDate.now();
+        int daysChecked = 0;
+
+        // Loop until we find 5 valid trading days
+        while (validTradingDays.size() < numDays) {
+            // Check if it's a valid trading day
+            if (holidaysService.isMarketOpenDate(dateToCheck)) {
+                // Special condition for today: the market must be closed for the day
+                if (!dateToCheck.equals(LocalDate.now()) || !holidaysService.isMarketOpenTime(LocalDateTime.now())) {
+                    validTradingDays.add(dateToCheck);
+                }
+            }
+
+            // Move to the previous day and increment the counter
+            dateToCheck = dateToCheck.minusDays(1);
+            daysChecked++;
+
+            // Optional: Add a safety limit for how far back to check
+            if (daysChecked > 30) {
+                throw new RuntimeException("Unable to find 5 valid trading days within the last 30 days.");
+            }
+        }
+
+        return validTradingDays;
     }
 
 }
